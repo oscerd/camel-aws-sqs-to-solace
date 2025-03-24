@@ -21,9 +21,11 @@ and create a queue named jms-test in the UI.
 
 Create an AWS SQS Queue named solace queue in the AWS Console, select the correct region of your choice.
 
-=== Set Application Proerties
+== Set Application Properties
 
 In 'application.properties' file add the correct host to solace.jms.host property.
+
+== Run the application
 
 [source,shell]
 ----
