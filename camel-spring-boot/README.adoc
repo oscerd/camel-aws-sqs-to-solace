@@ -1,0 +1,57 @@
+= AWS SQS to Solace Event Broker with Camel Spring Boot
+
+== Overview
+
+In this example, we'll consume messages from an AWS SQS Queue and send them to a Solace Event Broker via JMS protocol.
+
+== Prerequisites
+
+First start a Solace Event Broker via the following docker compose repository: https://github.com/SolaceLabs/solace-single-docker-compose
+
+Clone the project and run 
+----
+docker-compose -f PubSubStandard_singleNode.yml up -d
+----
+
+Visit localhost:8080
+
+and create a queue named jms-test in the UI.
+
+== AWS SQS Queue
+
+Create an AWS SQS Queue named solace queue in the AWS Console, select the correct region of your choice.
+
+== Set Application Properties
+
+In 'application.properties' file add the correct host to solace.jms.host property.
+
+== Run the application
+
+[source,shell]
+----
+$ mvn clean compile spring-boot:run
+----
+
+After the application is started, you can send messages to the Solace Queue by sending Events to AWS SQS Queue
+
+----
+aws sqs send-message --queue-url <sqs_queue_url> --message-body "HWC"
+----
+
+In the application logs you will see:
+
+----
+2025-03-25T11:17:04.068+01:00  INFO 23377 --- [://solace-queue] solace                                   : Sending message to Solace: HWC
+2025-03-25T11:17:04.079+01:00  INFO 23377 --- [://solace-queue] c.s.t.i.n.NettyTransportExecutorService  : Epoll is enabled; Netty 4.1.119.Final
+2025-03-25T11:17:04.086+01:00  INFO 23377 --- [://solace-queue] c.s.j.protocol.impl.TcpClientChannel     : Client-2: Connecting to host 'orig=tcp://172.18.0.2, scheme=tcp://, host=172.18.0.2' (host 1 of 1, smfclient 2, attempt 1 of 1, this_host_attempt: 1 of 1)
+2025-03-25T11:17:04.092+01:00  INFO 23377 --- [://solace-queue] c.s.jcsmp.impl.JCSMPBasicSession         : Client-2: AdCtrl version changes: 2->4
+2025-03-25T11:17:04.095+01:00  INFO 23377 --- [://solace-queue] c.s.j.protocol.impl.TcpClientChannel     : Client-2: Connected to host 'orig=tcp://172.18.0.2, scheme=tcp://, host=172.18.0.2' (smfclient 2) local(/172.18.0.1:58796) remote(172.18.0.2/172.18.0.2:55555)
+2025-03-25T11:17:04.248+01:00  INFO 23377 --- [://solace-queue] c.s.j.protocol.impl.TcpClientChannel     : Client-2: Channel Closed (smfclient 2)
+2025-03-25T11:17:04.258+01:00  INFO 23377 --- [sumer[jms-test]] c.s.t.i.n.NettyTransportExecutorService  : Epoll is enabled; Netty 4.1.119.Final
+2025-03-25T11:17:04.262+01:00  INFO 23377 --- [sumer[jms-test]] c.s.j.protocol.impl.TcpClientChannel     : Client-3: Connecting to host 'orig=tcp://172.18.0.2, scheme=tcp://, host=172.18.0.2' (host 1 of 1, smfclient 3, attempt 1 of 1, this_host_attempt: 1 of 1)
+2025-03-25T11:17:04.268+01:00  INFO 23377 --- [sumer[jms-test]] c.s.jcsmp.impl.JCSMPBasicSession         : Client-3: AdCtrl version changes: 2->4
+2025-03-25T11:17:04.268+01:00  INFO 23377 --- [sumer[jms-test]] c.s.j.protocol.impl.TcpClientChannel     : Client-3: Connected to host 'orig=tcp://172.18.0.2, scheme=tcp://, host=172.18.0.2' (smfclient 3) local(/172.18.0.1:58812) remote(172.18.0.2/172.18.0.2:55555)
+2025-03-25T11:17:04.271+01:00  INFO 23377 --- [sumer[jms-test]] solace-queue-consumer                    : Consuming message from Solace: HWC
+----
+
+The message is initially dispatched to an Solace queue, then relayed to an Consumed and Logged.
